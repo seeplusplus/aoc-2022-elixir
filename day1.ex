@@ -1,4 +1,4 @@
-defmodule Excersize1 do
+defmodule Exercise1 do
   def to_command(s) do
     try do
       {:add, s |> String.trim() |> String.to_integer()}
@@ -34,10 +34,10 @@ end
 
 result = IO.stream() |> 
   Enum.reduce_while(
-    Excersize1.init_state(),
+    Exercise1.init_state(),
     fn line, acc -> line
-      |> Excersize1.to_command()
-      |> Excersize1.apply_command(acc)
+      |> Exercise1.to_command()
+      |> Exercise1.apply_command(acc)
       |> then(fn acc -> if elem(acc, 2) do {:halt, acc} else {:cont, acc} end end)
     end
   )
