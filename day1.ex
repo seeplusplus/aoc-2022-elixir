@@ -7,9 +7,15 @@ defmodule Exercise1 do
     end
   end
 
-  def init_state() do
-    {nil, 0, false}
+  def get_answer(state) do
+    elem(state, 1) |> 
+      Enum.reduce(0, fn i, acc -> i + acc end)
   end
+
+  def init_state() do
+    {nil, [0, 0, 0], false}
+  end
+
   def apply_command(command, state) do
     case command do
       {:add, n} -> apply_add(n, state)
@@ -20,7 +26,10 @@ defmodule Exercise1 do
   defp apply_add(n, state) do
     {current, total, exit} = state
     new_current = if is_nil(current) do 0 else current end + n
-    {new_current, max(total, new_current), exit}
+    new_total = [ new_current | total ] |> 
+      Enum.sort(:desc) |>
+      Enum.take(3)
+    {new_current, new_total, exit}
   end
 
   defp apply_reset(state) do
@@ -42,4 +51,4 @@ result = IO.stream() |>
     end
   )
 
-  IO.puts(elem(result, 1))
+  IO.puts(Exercise1.get_answer(result))
