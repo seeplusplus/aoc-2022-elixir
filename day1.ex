@@ -41,14 +41,3 @@ defmodule Exercise1 do
   end
 end
 
-result = IO.stream() |> 
-  Enum.reduce_while(
-    Exercise1.init_state(),
-    fn line, acc -> line
-      |> Exercise1.to_command()
-      |> Exercise1.apply_command(acc)
-      |> then(fn acc -> if elem(acc, 2) do {:halt, acc} else {:cont, acc} end end)
-    end
-  )
-
-  IO.puts(Exercise1.get_answer(result))
