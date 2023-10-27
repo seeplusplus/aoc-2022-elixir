@@ -1,4 +1,4 @@
-defmodule Exercise1 do
+defmodule Day1 do
   def to_command(s) do
     try do
       {:add, s |> String.trim() |> String.to_integer()}
@@ -26,17 +26,22 @@ defmodule Exercise1 do
   defp apply_add(n, state) do
     {current, total, exit} = state
     new_current = if is_nil(current) do 0 else current end + n
-    new_total = [ new_current | total ] |> 
+    
+    {new_current, total, exit}
+  end
+
+  defp take_top_three(n, list) do
+    [ n | list ] |> 
       Enum.sort(:desc) |>
       Enum.take(3)
-    {new_current, new_total, exit}
   end
 
   defp apply_reset(state) do
     {current, total, exit} = state
+
     case current do
       nil -> {current, total, true}
-      _ -> {nil, total, exit}
+      _ -> {nil, take_top_three(current, total), exit}
     end
   end
 end
