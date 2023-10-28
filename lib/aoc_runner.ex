@@ -8,10 +8,9 @@ defmodule AOCRunner do
     Enum.reduce_while(
       {nil, advent.init_state()},
       fn line, acc -> line
-        |> advent.to_command()
-        |> then(fn command ->
+        |> then(fn line ->
             {u, state} = acc
-            {u, advent.apply_command(command, state)}
+            {u, advent.execute(line, state)}
           end)
         |> then(fn {u, s} ->
             if (line |> is_empty()) && (u |> is_empty()) do

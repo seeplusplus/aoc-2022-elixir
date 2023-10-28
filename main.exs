@@ -1,1 +1,1 @@
-AOCRunner.run(Day1)
+AOCRunner.run(Day2)
