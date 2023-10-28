@@ -3,10 +3,10 @@ defmodule AOCRunner do
     (s |> String.trim() |> String.length()) == 0
   end
 
-  def run(advent) do
+  def run(advent, part) do
     {_, state} = IO.stream() |>
     Enum.reduce_while(
-      {nil, advent.init_state()},
+      {nil, advent.init_state(part)},
       fn line, acc -> line
         |> then(fn line ->
             {u, state} = acc

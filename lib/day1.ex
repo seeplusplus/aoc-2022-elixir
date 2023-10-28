@@ -1,11 +1,18 @@
 defmodule Day1 do
   def get_answer(state) do
-    elem(state, 1) |>
-      Enum.reduce(0, fn i, acc -> i + acc end)
+    {_, total, part} = state
+    total |>
+      then(fn total -> case part do 
+        :part1 -> total
+        :part2 -> total |> Enum.reduce(0, fn i, acc -> i + acc end)
+      end end)
   end
 
-  def init_state() do
-    {nil, [0, 0, 0]}
+  def init_state(part) do
+    case part do
+      :part1 -> {nil, 0, part}
+      :part2 -> {nil, [0, 0, 0], part}
+    end
   end
 
   def execute(line, state) do 
@@ -30,10 +37,10 @@ defmodule Day1 do
   end
 
   defp apply_add(n, state) do
-    {current, total} = state
+    {current, total, part} = state
     new_current = n + if is_nil(current) do 0 else current end
     
-    {new_current, total}
+    {new_current, total, part}
   end
 
   defp take_top_three(n, list) do
@@ -43,9 +50,12 @@ defmodule Day1 do
   end
 
   defp apply_reset(state) do
-    {current, total} = state
+    {current, total, part} = state
     if !is_nil(current) do
-      {nil, take_top_three(current, total)}
+      case part do
+        :part1 -> {nil, max(total, current), part}
+        :part2 -> {nil, take_top_three(current, total), part}
+      end
     else
       state
     end
