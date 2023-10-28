@@ -8,12 +8,12 @@ defmodule Day1 do
   end
 
   def get_answer(state) do
-    elem(state, 1) |> 
+    elem(state, 1) |>
       Enum.reduce(0, fn i, acc -> i + acc end)
   end
 
   def init_state() do
-    {nil, [0, 0, 0], false}
+    {nil, [0, 0, 0]}
   end
 
   def apply_command(command, state) do
@@ -24,24 +24,24 @@ defmodule Day1 do
   end
 
   defp apply_add(n, state) do
-    {current, total, exit} = state
-    new_current = if is_nil(current) do 0 else current end + n
+    {current, total} = state
+    new_current = n + if is_nil(current) do 0 else current end
     
-    {new_current, total, exit}
+    {new_current, total}
   end
 
   defp take_top_three(n, list) do
-    [ n | list ] |> 
+    [ n | list ] |>
       Enum.sort(:desc) |>
       Enum.take(3)
   end
 
   defp apply_reset(state) do
-    {current, total, exit} = state
-
-    case current do
-      nil -> {current, total, true}
-      _ -> {nil, take_top_three(current, total), exit}
+    {current, total} = state
+    if !is_nil(current) do
+      {nil, take_top_three(current, total)}
+    else
+      state
     end
   end
 end
