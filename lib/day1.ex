@@ -1,12 +1,4 @@
 defmodule Day1 do
-  def to_command(s) do
-    try do
-      {:add, s |> String.trim() |> String.to_integer()}
-    rescue 
-      ArgumentError -> {:reset}
-    end
-  end
-
   def get_answer(state) do
     elem(state, 1) |>
       Enum.reduce(0, fn i, acc -> i + acc end)
@@ -16,10 +8,24 @@ defmodule Day1 do
     {nil, [0, 0, 0]}
   end
 
-  def apply_command(command, state) do
+  def execute(line, state) do 
+    apply_command(
+      line |> to_command(),
+      state)
+  end
+
+  defp apply_command(command, state) do
     case command do
       {:add, n} -> apply_add(n, state)
       {:reset} -> apply_reset(state)
+    end
+  end
+
+  defp to_command(s) do
+    try do
+      {:add, s |> String.trim() |> String.to_integer()}
+    rescue 
+      ArgumentError -> {:reset}
     end
   end
 
