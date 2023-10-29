@@ -13,8 +13,7 @@ defmodule Day3 do
   end
 
   defp to_priority(c) do
-    u = if is_nil(c) do 0 else if c < 97 do c - 38 else c - 96 end end
-    u
+    if is_nil(c) do 0 else if c < 97 do c - 38 else c - 96 end end
   end
 
   def execute(line, state) do
