@@ -1,1 +1,1 @@
-AOCRunner.run(Day2, :part2)
+AOCRunner.run(Day3, :part1)
