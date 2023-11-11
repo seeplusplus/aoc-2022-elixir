@@ -12,7 +12,7 @@ defmodule Day9 do
   end
 
   def execute(line, state) do
-    [command, count] = line |> String.split(" ");
+    [ movement, count] = line |> String.split(" ");
     { count, _ } = Integer.parse(count);
 
     Enum.reduce(
@@ -20,9 +20,9 @@ defmodule Day9 do
       state,
       fn (_, state) -> 
         { rope, tail_positions } = state
-        rope = command 
-          |> get_movement_direction()
-          |> move_head(rope)
+        rope = movement 
+          |> string_to_movement_direction()
+          |> move_rope_by_head(rope)
         { rope, MapSet.put(tail_positions, List.last(rope)) }
       end
     );  
@@ -33,20 +33,20 @@ defmodule Day9 do
     MapSet.size(tail_positions)
   end
 
-  defp move_head(direction, rope) do
+  defp move_rope_by_head(direction, rope) do
     [head | tail ] = rope
-    move_rope([add_2_tuple(head, direction)], tail)
+    reconcile_tail([add_2_tuple(head, direction)], tail)
   end
 
-  defp move_rope(good, bad) when bad == [] do
-    good
+  defp reconcile_tail(_, tail) when tail == [] do
+    tail
   end
 
-  defp move_rope(good, bad) do
-    leader = good |> List.last()
-    [ follower | tail ] = bad
+  defp reconcile_tail(head, tail) do
+    leader = head |> List.last()
+    [ follower | tail ] = tail
 
-    move_rope(good ++ [keep_min_distance(follower, leader, 1)], tail)
+    reconcile_tail(head ++ [keep_min_distance(follower, leader, 1)], tail)
   end
 
   defp keep_min_distance(tail, head, min_distance) do
@@ -56,17 +56,24 @@ defmodule Day9 do
       tail 
     else
       {a, b} = difference
-      megan = fn (x) -> if x != 0 do
-          if x > 0 do 1 else -1 end
-        else
-          0
-        end
-      end
-      add_2_tuple(tail, {megan.(a), megan.(b)})
+      
+      add_2_tuple(tail, {megan(a, 0, -1, 1), megan(b, 0, -1, 1)})
     end
   end
 
-  defp get_movement_direction(direction) do
+  defp megan(x, _, _, pos) when x > 0 do
+    pos
+  end
+
+  defp megan(x, _, neg, _) when x < 0 do
+    neg
+  end
+
+  defp megan(0, zero, _, _) do
+    zero
+  end
+ 
+  defp string_to_movement_direction(direction) do
     case direction do
       "R" -> {1, 0}
       "L" -> {-1, 0}
