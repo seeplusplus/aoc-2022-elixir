@@ -1,39 +1,56 @@
 defmodule Day9 do
   def init_state(p) when p == :part1 do
-    { {0,0}, {0,0}, MapSet.new() }
+    { [ {0,0}, {0,0} ], MapSet.new() }
+  end
+
+  def init_state(p) when p == :part2 do
+    { [ {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}, {0,0}], MapSet.new() }
+  end
+
+  def execute(line, state) when line == "" do
+    state
   end
 
   def execute(line, state) do
-    if String.trim(line) == "" do
-      state
-    else
-      [command, count] = line |> String.split(" ");
-      { count, _ } = Integer.parse(count);
+    [command, count] = line |> String.split(" ");
+    { count, _ } = Integer.parse(count);
 
-      move_rope = fn (movement, {head, tail, tail_positions}) ->
-        head = movement |> get_movement_tuple() |> add_2_tuple(head);
-        tail = tail |> keep_min_distance(head, 1)
-        tail_positions = MapSet.put(tail_positions, tail)
-        {head, tail, tail_positions}
+    Enum.reduce(
+      1..count,
+      state,
+      fn (_, state) -> 
+        { rope, tail_positions } = state
+        rope = command 
+          |> get_movement_direction()
+          |> move_head(rope)
+        { rope, MapSet.put(tail_positions, List.last(rope)) }
       end
+    );  
+  end
 
-      Enum.reduce(
-        1..count,
-        state,
-        fn (_, state) -> 
-          #IO.puts(command)
-          #IO.puts(inspect(state))
-          new_state = move_rope.(command, state) 
-          #IO.puts(inspect(new_state))
-          new_state
-        end
-      );  
-    end
+  def get_answer(state) do
+    {_, tail_positions } = state
+    MapSet.size(tail_positions)
+  end
+
+  defp move_head(direction, rope) do
+    [head | tail ] = rope
+    move_rope([add_2_tuple(head, direction)], tail)
+  end
+
+  defp move_rope(good, bad) when bad == [] do
+    good
+  end
+
+  defp move_rope(good, bad) do
+    leader = good |> List.last()
+    [ follower | tail ] = bad
+
+    move_rope(good ++ [keep_min_distance(follower, leader, 1)], tail)
   end
 
   defp keep_min_distance(tail, head, min_distance) do
     difference = distance_vector(tail, head)
-    #IO.puts(inspect(difference))
 
     if max_coord_difference(tail, head) <= min_distance do 
       tail 
@@ -49,12 +66,7 @@ defmodule Day9 do
     end
   end
 
-  def get_answer(state) do
-    {_, _, tail_positions } = state
-    MapSet.size(tail_positions)
-  end
-
-  defp get_movement_tuple(direction) do
+  defp get_movement_direction(direction) do
     case direction do
       "R" -> {1, 0}
       "L" -> {-1, 0}
@@ -73,7 +85,6 @@ defmodule Day9 do
 
   defp max_coord_difference(x, y) do 
     {a, b} = { abs(elem(x,0)-elem(y,0)), abs(elem(x,1)-elem(y,1)) }
-    #IO.puts("max_coord_difference: " <> inspect({a,b}))
     max(a, b)
   end
 end

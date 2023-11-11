@@ -17,7 +17,7 @@ defmodule AOCRunner do
     run_until_exit = fn line, acc -> 
       {_, state} = acc
 
-      put_elem(acc, 1, advent.execute(line, state)) |>
+      put_elem(acc, 1, advent.execute(line |> String.trim(), state)) |>
       then(fn {last_line, s} ->
         {(if both_empty?(line, last_line), do: :halt, else: :cont), {String.trim(line), s}}
       end)
