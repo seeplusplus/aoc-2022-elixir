@@ -8,16 +8,17 @@ defmodule Day2 do
   end
 
   def execute(line, state) do
-    if line |> String.trim() |> String.length == 0 do
+    if line |> String.trim() |> String.length() == 0 do
       state
     else
       {_, player, outcome} = parse_moves(line, state.part)
-      
+
       init_state(
-        state.score + 
-        points_for_move(player) +
-        points_from_outcome(outcome),
-        state.part)
+        state.score +
+          points_for_move(player) +
+          points_from_outcome(outcome),
+        state.part
+      )
     end
   end
 
@@ -48,35 +49,42 @@ defmodule Day2 do
       opposing_move
     else
       case opposing_move do
-        :rock -> case outcome do
-          :win -> :paper
-          :loss -> :scissors
-        end
-        :paper -> case outcome do
-          :win -> :scissors
-          :loss -> :rock
-        end
-        :scissors -> case outcome do
-          :win -> :rock
-          :loss -> :paper
-        end
+        :rock ->
+          case outcome do
+            :win -> :paper
+            :loss -> :scissors
+          end
+
+        :paper ->
+          case outcome do
+            :win -> :scissors
+            :loss -> :rock
+          end
+
+        :scissors ->
+          case outcome do
+            :win -> :rock
+            :loss -> :paper
+          end
       end
     end
   end
 
-  
   defp parse_move(move, side) do
     case side do
-      :left -> case move do
-        "A" -> :rock
-        "B" -> :paper
-        "C" -> :scissors
-      end
-      :right -> case move do
-        "X" -> :rock
-        "Y" -> :paper
-        "Z" -> :scissors
-      end
+      :left ->
+        case move do
+          "A" -> :rock
+          "B" -> :paper
+          "C" -> :scissors
+        end
+
+      :right ->
+        case move do
+          "X" -> :rock
+          "Y" -> :paper
+          "Z" -> :scissors
+        end
     end
   end
 
@@ -93,24 +101,30 @@ defmodule Day2 do
       0
     else
       case a do
-        :rock -> case b do
-          :paper -> -1
-          :scissors -> 1
-        end
-        :paper -> case b do
-          :rock -> 1
-          :scissors -> -1
-        end
-        :scissors -> case b do
-          :rock -> -1
-          :paper -> 1
-        end
+        :rock ->
+          case b do
+            :paper -> -1
+            :scissors -> 1
+          end
+
+        :paper ->
+          case b do
+            :rock -> 1
+            :scissors -> -1
+          end
+
+        :scissors ->
+          case b do
+            :rock -> -1
+            :paper -> 1
+          end
       end
     end
   end
 
   defp outcome?(match) when is_tuple(match) and tuple_size(match) == 2 do
     {opponent, player} = match
+
     case sort_(player, opponent) do
       1 -> :win
       0 -> :draw
