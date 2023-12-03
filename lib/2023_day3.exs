@@ -31,8 +31,6 @@ part2 = fn s ->
   for [pre, curr, post] <-
         s
         |> Enum.reject(&(String.length(&1) == 0))
-        |> then(fn x -> Enum.concat([""], x) end)
-        |> then(fn x -> Enum.concat(x, [""]) end)
         |> Enum.chunk(3, 1)
         |> Enum.map(fn u -> Enum.map(u, &String.trim/1) end),
       curr |> String.contains?("*"),
