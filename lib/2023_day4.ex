@@ -1,12 +1,9 @@
 defmodule Card do
-  defp to_list_numbers(str) do
+  defp split(str) do
     str
+    |> String.trim()
     |> String.split(" ")
     |> Enum.filter(fn s -> String.length(s) !== 0 end)
-    |> Enum.map(fn u ->
-      {i, _} = Integer.parse(u)
-      i
-    end)
   end
 
   defp count_winning_cards(player_card, winning_numbers) do
@@ -17,12 +14,13 @@ defmodule Card do
     [_, numbers] = rest |> String.split(":")
     [winning, player] = numbers |> String.split("|")
 
-    [winning |> String.trim() |> to_list_numbers(), player |> String.trim() |> to_list_numbers()]
+    [winning |> split(), player |> split()]
   end
 
   def parse(input) do
     for card <- input |> String.split("\n"),
-        [winning_numbers, our_numbers] = parse_card(card) do
+      card != "",
+      [winning_numbers, our_numbers] = parse_card(card) do
       [winning_numbers, our_numbers]
     end
   end
@@ -38,18 +36,10 @@ defmodule Card do
   end
 
   def part2(cards) do
-    copies_of_each_card =
-      cards
-      |> Enum.with_index()
-      |> Enum.map(fn {_, _} ->
-        1
-      end)
-      |> Enum.into([])
-
     cards
     |> Enum.with_index()
     |> Enum.reduce(
-      copies_of_each_card,
+      List.duplicate(1, cards |> Enum.count()),
       fn {[winning, player], idx}, copies ->
         self_copies = Enum.at(copies, idx)
         won = count_winning_cards(player, winning)
