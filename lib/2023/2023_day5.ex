@@ -110,15 +110,14 @@ defmodule Mix.Tasks.Day5 do
           transposed = RangeUtil.from_start(transpose_start, intersection |> Range.size())
 
           {
-            [transposed | transposed_ranges] |> Enum.reject(&(&1 == ..)),
+            [transposed | transposed_ranges],
             leftover
-            |> Enum.flat_map(fn r -> RangeUtil.difference(r, intersection) end)
-            |> Enum.reject(&(&1 == ..))
+              |> Enum.flat_map(fn r -> RangeUtil.difference(r, intersection) end)
           }
       end
 
     domain = leftover ++ transposed
-    domain |> Stream.flat_map(&get_location(dest, &1, maps))
+    domain |> Stream.reject(&(&1 == ..)) |> Stream.flat_map(&get_location(dest, &1, maps))
   end
 
   def part1(state) do
@@ -128,14 +127,34 @@ defmodule Mix.Tasks.Day5 do
     |> Enum.min()
   end
 
-  def part2(state) do
-    for range <- state.ranges,
-        reduce: nil do
-      acc ->
-        min(
-          acc,
-          get_location(:seed, range, state.maps) |> Stream.map(fn u -> u.first end) |> Enum.min()
-        )
+  def loop_receive(max_len, acc) do
+      cond do
+        acc |> Enum.count() == max_len ->
+          acc |> Enum.min()
+        true ->
+          receive do
+            n -> loop_receive(max_len, [n | acc])
+          end
     end
+  end
+  def part2(state) do
+    current = self()
+
+    pids =
+      for range <- state.ranges do
+        spawn_link(fn ->
+          send(
+            current,
+            get_location(:seed, range, state.maps)
+            |> Stream.map(fn u -> u.first end)
+            |> Enum.min()
+          )
+        end)
+      end
+
+    loop_receive(
+      pids |> Enum.count(),
+      []
+    )
   end
 end
