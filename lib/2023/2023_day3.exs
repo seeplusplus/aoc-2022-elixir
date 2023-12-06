@@ -27,6 +27,8 @@ part1 = fn s ->
   |> Enum.sum()
 end
 
+r_digits = ~r/\d+/
+
 part2 = fn s ->
   for [pre, curr, post] <-
         s
@@ -36,7 +38,9 @@ part2 = fn s ->
       curr |> String.contains?("*"),
       [{gear_idx, _}] <- Regex.scan(~r/\*/, curr, return: :index),
       matches =
-        grab_numbers.(pre) |> Enum.concat(grab_numbers.(post)) |> Enum.concat(grab_numbers.(curr)),
+        grab_numbers.(pre)
+        |> Enum.concat(grab_numbers.(post))
+        |> Enum.concat(grab_numbers.(curr)),
       valid_matches =
         matches
         |> Enum.filter(fn {m_idx, m_len, _} ->
@@ -49,4 +53,4 @@ part2 = fn s ->
   |> Enum.sum()
 end
 
-part2.(IO.stream()) |> IO.puts()
+part1.(IO.stream()) |> IO.puts()

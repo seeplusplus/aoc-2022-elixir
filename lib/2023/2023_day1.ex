@@ -50,8 +50,8 @@ defmodule Day1_2024 do
       0,
       fn i, _ ->
         cur_char = l |> String.at(len - i)
-        IO.puts("examining ")
-        IO.puts(cur_char)
+        # IO.puts("examining ")
+        # IO.puts(cur_char)
         int_at_pos = cur_char |> Integer.parse()
 
         case int_at_pos do
@@ -74,7 +74,7 @@ defmodule Day1_2024 do
   end
 
   def search_for_written_number(line) do
-    IO.puts("searching " <> line)
+    # IO.puts("searching " <> line)
 
     numbers = [
       "one",
@@ -111,7 +111,7 @@ defmodule Day1_2024 do
         end)
         |> Enum.filter(&(&1 |> elem(1) |> Enum.count() > 1))
 
-      IO.puts(inspect(splits))
+      # IO.puts(inspect(splits))
 
       number_word =
         splits

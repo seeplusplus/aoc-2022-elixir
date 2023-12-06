@@ -19,8 +19,8 @@ defmodule Card do
 
   def parse(input) do
     for card <- input |> String.split("\n"),
-      card != "",
-      [winning_numbers, our_numbers] = parse_card(card) do
+        card != "",
+        [winning_numbers, our_numbers] = parse_card(card) do
       [winning_numbers, our_numbers]
     end
   end
