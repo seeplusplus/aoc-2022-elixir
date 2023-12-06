@@ -11,13 +11,17 @@ defmodule Mix.Tasks.GetInput do
   def run(args) do
     [year, day] = args
     write_file = &File.write("./input/#{year}_#{day}.txt", &1)
-    HTTPoison.start
+    HTTPoison.start()
+
     HTTPoison.get!(
       "https://adventofcode.com/#{year}/day/#{day}/input",
       get_request_headers()
     )
-    |> Map.get(:body) 
-    |> then(fn i -> IO.puts(i); i end)
+    |> Map.get(:body)
+    |> then(fn i ->
+      IO.puts(i)
+      i
+    end)
     |> write_file.()
   end
 end

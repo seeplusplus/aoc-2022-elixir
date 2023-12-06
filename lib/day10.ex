@@ -1,8 +1,6 @@
 import Integer, only: [mod: 2]
 
 defmodule Day10 do
-  @behaviour Solution
-
   def init_state(p) when p == :part1 do
     %{vm: VirtualMachine.new(), acc: 0, p: p}
   end
