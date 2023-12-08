@@ -64,16 +64,11 @@ defmodule Mix.Tasks.Day8 do
     end 
 
     loop_receive(pids |> Enum.count(), [])
-      |> Enum.reduce(
-        1,
-        fn a, acc -> 
-          MathUtil.lcm(a, acc)
-        end
-      ) |> IO.puts()
+      |> Enum.reduce(1, &MathUtil.lcm/2)
     end
 
   def run(_) do
     {_, puzzle_input} = File.read("./input/2023_8.txt")
-    solve(puzzle_input, :part2)
+    solve(puzzle_input, :part2) |> IO.puts()
   end
 end
