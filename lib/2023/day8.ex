@@ -27,9 +27,8 @@ defmodule Mix.Tasks.Day8 do
     end
   end
 
-  def run(_) do
-    {_, puzzle_input} = File.read("./input/2023_8.txt")
-    [instructions, nodes] = puzzle_input |> String.split("\n\n")
+  def solve(input, _) do
+    [instructions, nodes] = input |> String.split("\n\n")
 
     nodes =
       for {key, steps} <-
@@ -73,4 +72,8 @@ defmodule Mix.Tasks.Day8 do
       ) |> IO.puts()
     end
 
+  def run(_) do
+    {_, puzzle_input} = File.read("./input/2023_8.txt")
+    solve(puzzle_input, :part2)
   end
+end
