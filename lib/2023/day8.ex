@@ -3,26 +3,25 @@ defmodule Mix.Tasks.Day8 do
   defp instruction_to_index("L"), do: 0
   defp instruction_to_index("R"), do: 1
 
-  def walk(_, _, step, <<_::16>> <> "Z") do
+  def walk(_, _, step, <<_::binary-size(2)>> <> "Z") do
     step
   end
 
   def walk(instructions, nodes, step, current_location) do
-    l =
+    index =
       instructions
-      |> String.graphemes()
-      |> Enum.at(rem(step, String.length(instructions)))
+      |> String.at(rem(step, String.length(instructions)))
+      |> instruction_to_index()
 
-    index = instruction_to_index(l)
     new_location = elem(Map.get(nodes, current_location), index)
     walk(instructions, nodes, step + 1, new_location)
   end
 
-  def loop_receive(max_len, acc) do
+  def loop_receive(max_len, acc, count) do
     cond do
-      acc |> Enum.count() == max_len -> acc
+      count == max_len -> acc
       true -> receive do
-        n -> loop_receive(max_len,[n | acc])
+        n -> loop_receive(max_len, MathUtil.lcm(acc, n), count + 1)
       end
     end
   end
@@ -36,20 +35,13 @@ defmodule Mix.Tasks.Day8 do
             |> String.split("\n")
             |> Stream.reject(&(&1 == ""))
             |> Stream.map(&String.split(String.trim(&1), " = "))
-            |> Stream.map(
-              &{
-                &1 |> Enum.at(0),
-                Regex.replace(~r/[\(\)]/, &1 |> Enum.at(1), "")
-                |> String.split(", ")
-                |> List.to_tuple()
-              }
-            ),
+            |> Stream.map(fn [from, "(" <> <<a::binary-size(3)>> <> ", " <> <<b::binary-size(3)>> <> ")"] -> {from, {a,b}} end),
           into: %{} do
         {key, steps}
       end
 
     parent = self()
-    pids = for entry <- nodes |> Map.keys() |> Enum.filter(&(&1 |> String.ends_with?("A"))) do
+    pids = for entry <- nodes |> Map.keys() |> Stream.filter(&(&1 |> String.ends_with?("A"))) do
       spawn(fn -> 
         send(parent,
           walk(
@@ -63,9 +55,8 @@ defmodule Mix.Tasks.Day8 do
       )
     end 
 
-    loop_receive(pids |> Enum.count(), [])
-      |> Enum.reduce(1, &MathUtil.lcm/2)
-    end
+    loop_receive(pids |> Enum.count(), 1, 0)
+  end
 
   def run(_) do
     {_, puzzle_input} = File.read("./input/2023_8.txt")
