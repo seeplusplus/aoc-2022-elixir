@@ -3,55 +3,53 @@ defmodule Mix.Tasks.Day9 do
 
   def run(_) do
     {_, content} = File.read("./input/2023_9.txt")
-
-    solve(content)|> inspect() |> IO.puts()
+    solve(content, :part2) |> inspect() |> IO.puts()
   end
 
-  def solve(content) do
+  def reverse_if_part_two(list, part) do
+    if part == :part2 do
+      Enum.reverse(list)
+    else
+      list
+    end
+  end
+
+  def solve(content, part) do
     content
-      |> String.split("\n")
-      |> Stream.reject(&(&1 === ""))
-      |> Stream.map(fn line ->
-        line
-        |> String.split(" ")
-        |> Stream.map(&String.to_integer/1)
-        |> Enum.to_list()
-      end) 
-      |> Stream.map(fn list -> 
-      IO.puts(inspect(list))
-      extrapolate(list)
+    |> String.split("\n")
+    |> Stream.reject(&(&1 === ""))
+    |> Stream.map(fn line ->
+      line
+      |> String.split(" ")
+      |> Stream.map(&String.to_integer/1)
+      |> Enum.to_list()
+      |> then(&reverse_if_part_two(&1, part))
       end)
-      |> Enum.reduce([], 
-        fn l, acc -> 
-        [l |> Enum.sum()
-        | acc]
-      end)  |> Enum.sum()
-      
+    |> Stream.map(&extrapolate/1)
+    |> Enum.reduce(0, &(&1 + &2))
   end
 
   def extrapolate(list) do
-    extrapolate(list, [])
+    extrapolate(list, 0)
   end
 
   def to_difference_list(nums) do
-    IO.puts("differencing #{inspect(nums)}")
-    list = nums 
+    list =
+      nums
       |> Stream.chunk_every(2, 1, :discard)
-      |> Enum.reduce([], fn [a,b], acc -> [ b - a | acc] end)
-    IO.puts("differenc was #{inspect(list)}")
+      |> Enum.reduce([], fn [a, b], acc -> [b - a | acc] end)
+      |> Enum.reverse()
     list
   end
 
   def extrapolate([0], acc) do
-    [0 | acc]
+    acc
   end
 
   def extrapolate(list, acc) do
-    IO.puts("extrapolating #{inspect(list)}")
     extrapolate(
-      list |> to_difference_list() |> Enum.reverse(),
-      [list |> List.last() | acc]
+      to_difference_list(list),
+      List.last(list) + acc
     )
   end
-
-  end
+end
