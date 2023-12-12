@@ -19,10 +19,13 @@ defmodule Mix.Tasks.Day8 do
 
   def loop_receive(max_len, acc, count) do
     cond do
-      count == max_len -> acc
-      true -> receive do
-        n -> loop_receive(max_len, MathUtil.lcm(acc, n), count + 1)
-      end
+      count == max_len ->
+        acc
+
+      true ->
+        receive do
+          n -> loop_receive(max_len, MathUtil.lcm(acc, n), count + 1)
+        end
     end
   end
 
@@ -35,25 +38,33 @@ defmodule Mix.Tasks.Day8 do
             |> String.split("\n")
             |> Stream.reject(&(&1 == ""))
             |> Stream.map(&String.split(String.trim(&1), " = "))
-            |> Stream.map(fn [from, "(" <> <<a::binary-size(3)>> <> ", " <> <<b::binary-size(3)>> <> ")"] -> {from, {a,b}} end),
+            |> Stream.map(fn [
+                               from,
+                               "(" <>
+                                 <<a::binary-size(3)>> <> ", " <> <<b::binary-size(3)>> <> ")"
+                             ] ->
+              {from, {a, b}}
+            end),
           into: %{} do
         {key, steps}
       end
 
     parent = self()
-    pids = for entry <- nodes |> Map.keys() |> Stream.filter(&(&1 |> String.ends_with?("A"))) do
-      spawn(fn -> 
-        send(parent,
-          walk(
-            instructions,
-            nodes,
-            0,
-            entry
+
+    pids =
+      for entry <- nodes |> Map.keys() |> Stream.filter(&(&1 |> String.ends_with?("A"))) do
+        spawn(fn ->
+          send(
+            parent,
+            walk(
+              instructions,
+              nodes,
+              0,
+              entry
+            )
           )
-        )
-        end
-      )
-    end 
+        end)
+      end
 
     loop_receive(pids |> Enum.count(), 1, 0)
   end

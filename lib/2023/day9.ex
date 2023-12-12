@@ -24,7 +24,7 @@ defmodule Mix.Tasks.Day9 do
       |> Stream.map(&String.to_integer/1)
       |> Enum.to_list()
       |> then(&reverse_if_part_two(&1, part))
-      end)
+    end)
     |> Stream.map(&extrapolate/1)
     |> Enum.reduce(0, &(&1 + &2))
   end
@@ -39,6 +39,7 @@ defmodule Mix.Tasks.Day9 do
       |> Stream.chunk_every(2, 1, :discard)
       |> Enum.reduce([], fn [a, b], acc -> [b - a | acc] end)
       |> Enum.reverse()
+
     list
   end
 

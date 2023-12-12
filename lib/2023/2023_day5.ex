@@ -79,7 +79,7 @@ defmodule Mix.Tasks.Day5 do
     n
   end
 
-  def get_location(:location, range, _) do
+  def get_location(:location, range) do
     [range]
   end
 
@@ -96,8 +96,8 @@ defmodule Mix.Tasks.Day5 do
     get_location(dest, transpose, maps)
   end
 
-  def get_location(source, range, maps) do
-    {dest, ranges} = maps |> Map.get(source)
+  def get_location(source, range) do
+    {dest, ranges} = :persistent_term.get(:maps) |> Map.get(source)
 
     {transposed, leftover} =
       for {dest_range, source_range} <- ranges,
@@ -112,12 +112,12 @@ defmodule Mix.Tasks.Day5 do
           {
             [transposed | transposed_ranges],
             leftover
-              |> Enum.flat_map(fn r -> RangeUtil.difference(r, intersection) end)
+            |> Enum.flat_map(fn r -> RangeUtil.difference(r, intersection) end)
           }
       end
 
     domain = leftover ++ transposed
-    domain |> Stream.reject(&(&1 == ..)) |> Stream.flat_map(&get_location(dest, &1, maps))
+    domain |> Stream.reject(&(&1 == ..)) |> Stream.flat_map(&get_location(dest, &1))
   end
 
   def part1(state) do
@@ -128,24 +128,28 @@ defmodule Mix.Tasks.Day5 do
   end
 
   def loop_receive(max_len, acc) do
-      cond do
-        acc |> Enum.count() == max_len ->
-          acc |> Enum.min()
-        true ->
-          receive do
-            n -> loop_receive(max_len, [n | acc])
-          end
+    cond do
+      acc |> Enum.count() == max_len ->
+        acc |> Enum.min()
+
+      true ->
+        receive do
+          n -> loop_receive(max_len, [n | acc])
+        end
     end
   end
+
   def part2(state) do
     current = self()
+
+    :persistent_term.put(:maps, state.maps)
 
     pids =
       for range <- state.ranges do
         spawn_link(fn ->
           send(
             current,
-            get_location(:seed, range, state.maps)
+            get_location(:seed, range)
             |> Stream.map(fn u -> u.first end)
             |> Enum.min()
           )
