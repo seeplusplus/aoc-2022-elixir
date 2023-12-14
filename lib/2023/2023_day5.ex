@@ -127,14 +127,13 @@ defmodule Mix.Tasks.Day5 do
     |> Enum.min()
   end
 
-  def loop_receive(max_len, acc) do
+  def loop_receive(max_len, acc, count) do
     cond do
-      acc |> Enum.count() == max_len ->
-        acc |> Enum.min()
+      count == max_len -> acc
 
       true ->
         receive do
-          n -> loop_receive(max_len, [n | acc])
+          n -> loop_receive(max_len, min(n, acc), count + 1)
         end
     end
   end
@@ -158,7 +157,8 @@ defmodule Mix.Tasks.Day5 do
 
     loop_receive(
       pids |> Enum.count(),
-      []
+      nil,
+      0
     )
   end
 end
