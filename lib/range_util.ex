@@ -57,4 +57,22 @@ defmodule RangeUtil do
       r2.first >= r1.first and r2.last >= r1.last -> Range.new(r2.first, r1.last)
     end
   end
+
+  @spec split_at(range :: Range.t(), value :: integer(), bound :: :lb | :ub) :: [Range.t()]
+  def split_at(range, value, bound) do
+    if value <= range.first or value >= range.last do
+      [range]
+    else
+      ls = min(range.first, value - 1)
+      le = min(range.last, value - 1)
+      rs = max(range.first, value + 1)
+      re = max(range.last, value + 1)
+
+      if bound == :lb do
+        [ls..value, rs..re]
+      else
+        [ls..le, value..re]
+      end
+    end
+  end
 end
