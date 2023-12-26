@@ -1,0 +1,345 @@
+# aoc 21 2023
+
+```elixir
+Mix.install([
+  {:kino_aoc, "~> 0.1"}
+])
+```
+
+## Section
+
+<!-- livebook:{"attrs":"eyJhc3NpZ25fdG8iOiJwdXp6bGVfaW5wdXQiLCJkYXkiOiIyMSIsInNlc3Npb25fc2VjcmV0IjoiQU9DX1NFU1NJT04iLCJ5ZWFyIjoiMjAyMyJ9","chunks":null,"kind":"Elixir.KinoAOC.HelperCell","livebook_object":"smart_cell"} -->
+
+```elixir
+{:ok, puzzle_input} =
+  KinoAOC.download_puzzle("2023", "21", System.fetch_env!("LB_AOC_SESSION"))
+```
+
+```elixir
+ex = ~s"...........
+.....###.#.
+.###.##..#.
+..#.#...#..
+....#.#....
+.##..S####.
+.##..#...#.
+.......##..
+.##.#.####.
+.##..##.##.
+..........."
+```
+
+```elixir
+defmodule Coordinates2D do
+  def polar_to_cartesian_int(r, theta) do
+    {r * :math.cos(theta), r * :math.sin(theta)}
+  end
+
+  def window_centered_at(p, delta_x, delta_y) do
+    {x, y} = p
+    dx = delta_x / 2
+    dy = delta_y / 2
+
+    {
+      {
+        x - dx,
+        y - dy
+      },
+      {
+        x + dx,
+        y + dy
+      }
+    }
+  end
+end
+```
+
+```elixir
+{x, y} = Coordinates2D.polar_to_cartesian_int(26_501_365, 2 * :math.pi())
+```
+
+```elixir
+Coordinates2D.window_centered_at({x, y}, 10, 10)
+```
+
+```elixir
+
+```
+
+```elixir
+defmodule Grid2D do
+  defstruct type: :repeating, inner: nil, w: 0, h: 0, origin: {0, 0}
+
+  def from_repeating_text(i, mapper \\ fn i -> i end, origin \\ {0, 0}) do
+    grid =
+      i
+      |> String.split("\n")
+      |> Stream.with_index()
+      |> Enum.flat_map(fn {line, row} ->
+        line
+        |> String.to_charlist()
+        |> Stream.with_index()
+        |> Enum.map(fn {letter, index} ->
+          {{row, index}, mapper.(letter)}
+        end)
+      end)
+      |> Map.new()
+
+    {{h, w}, _} = grid |> Enum.max_by(fn {c, _} -> c end)
+    %Grid2D{type: :repeating, inner: grid, h: h, w: w, origin: origin}
+  end
+
+  def display(grid, nil, mapper) do
+    display(grid, {{0, 0}, {9, 9}}, mapper)
+  end
+
+  def display(grid, rect, mapper \\ fn i -> i end) do
+    window(
+      grid,
+      rect
+    )
+    |> Enum.map(&mapper.(&1))
+  end
+
+  def center(grid) do
+  end
+
+  def elem(grid, x, y) when grid.type == :repeating do
+    x =
+      case rem(x, grid.w) do
+        n when n < 0 -> n + grid.w
+        n -> n
+      end
+
+    y =
+      case rem(y, grid.h) do
+        n when n < 0 -> n + grid.h
+        n -> n
+      end
+
+    elem_inner(grid.inner, x, y)
+  end
+
+  def window(grid, r) do
+    IO.puts(inspect(r))
+    {ox, oy} = grid.origin
+    {{min_x, min_y}, {max_x, max_y}} = r
+
+    for y <- min_y..max_y,
+        x <- min_x..max_x do
+      Grid2D.elem(grid, ox + x, oy + y)
+    end
+  end
+
+  defp elem_inner(inner, x, y) do
+    IO.puts("retriving elt at index #{inspect({x, y})}")
+    ret = inner |> Map.get({x, y})
+    IO.puts("returning #{inspect(ret)}")
+    ret
+  end
+end
+```
+
+```elixir
+grid =
+  Grid2D.from_repeating_text(
+    ex,
+    fn letter ->
+      case letter do
+        ?. -> :garden
+        ?# -> :rock
+        ?S -> :elf
+      end
+    end,
+    {5, -5}
+  )
+```
+
+```elixir
+Coordinates2D.polar_to_cartesian_int(0, 0)
+|> Coordinates2D.window_centered_at(3, 3)
+|> then(fn {{minx, miny}, {maxx, maxy}} ->
+  {{floor(minx), floor(miny)}, {ceil(maxx), ceil(maxy)}}
+end)
+```
+
+```elixir
+rem(-3, 5) + 5
+```
+
+```elixir
+Grid2D.display(
+  grid,
+  Coordinates2D.polar_to_cartesian_int(5, 3 * :math.pi() / 2)
+  |> Coordinates2D.window_centered_at(3, 3)
+  |> then(fn {{minx, miny}, {maxx, maxy}} ->
+    {{floor(minx), floor(miny)}, {ceil(maxx), ceil(maxy)}}
+  end),
+  fn l ->
+    case l do
+      :garden -> ?.
+      :rock -> ?#
+      :elf -> ?S
+    end
+  end
+)
+|> Enum.chunk_every(5)
+|> Enum.join("\n")
+|> IO.puts()
+```
+
+```elixir
+
+```
+
+```elixir
+grid |> Grid2D.elem(5, 5)
+```
+
+```elixir
+# map =
+#   puzzle_input
+#   |> String.split("\n")
+#   |> Stream.with_index()
+#   |> Enum.flat_map(fn {line, row} ->
+#     line
+#     |> String.to_charlist()
+#     |> Stream.with_index()
+#     |> Enum.map(fn {letter, index} ->
+#       type =
+#         case letter do
+#           ?. -> :garden
+#           ?# -> :rock
+#           ?S -> :elf
+#         end
+
+#       {{row, index}, type}
+#     end)
+#   end)
+#   |> Map.new()
+```
+
+```elixir
+{map_y, map_x} = map |> Map.keys() |> Enum.max()
+```
+
+```elixir
+{elf, _} = map |> Enum.find(nil, fn {_, value} -> value === :elf end)
+```
+
+```elixir
+steps = [
+  {-1, 0},
+  {1, 0},
+  {0, 1},
+  {0, -1}
+]
+```
+
+```elixir
+# 1..64 |>
+#   Enum.reduce(
+#     [elf],
+#     fn _, locations ->
+#       for {e_y, e_x} <- steps,
+#         {l_y, l_x} <- locations,
+#         next_loc = {e_y + l_y, e_x + l_x,},
+#         cycled_log = {rem(e_y + l_y, map_y), rem(e_x + l_x, map_x)},
+#         Map.get(map, cycled_log) === :garden or Map.get(map, cycled_log) === :elf,
+#         into: MapSet.new() do
+#           next_loc
+#       end
+#     end
+#   ) |> MapSet.size()
+```
+
+```elixir
+elf
+```
+
+```elixir
+# n = 64
+# for y <- -n..n,
+#  x <- -(n-y)..(n-y),
+#  rem(x+y, 2) === rem(n, 2),
+#  tile = Map.get(map, {elem(elf, 0) + y , elem(elf, 1) + x}),
+#  tile == :garden || tile == :elf,
+#  reduce: 0
+#  do
+#   acc -> acc + 1
+#    #{x, y}
+#  end
+```
+
+```elixir
+a = [1, 2, 3]
+b = [2, 3]
+a -- b
+```
+
+```elixir
+step_one =
+  for {y, x} <- steps,
+      {ey, ex} = elf,
+      new = {y + ey, ex + x},
+      tile = Map.get(map, new),
+      tile == :garden or tile == :elf do
+    new
+  end
+```
+
+```elixir
+two_steps =
+  for y <- -2..2, x <- -2..2, rem(x + y, 2) == rem(2, 2), abs(x) + abs(y) <= 2 do
+    {y, x}
+  end
+```
+
+```elixir
+steps
+```
+
+```elixir
+# r = Range.new(3, 26501365, 2)
+# 26501365, 2)
+r = Range.new(3, 26_501_365, 2)
+
+results =
+  for i <- r,
+      reduce: {MapSet.new([step_one]), MapSet.new([step_one])} do
+    {prev_steps, steps} ->
+      new_steps =
+        for {e_y, e_x} <- steps,
+            {l_y, l_x} <- prev_steps,
+            next_loc = {e_y + l_y, e_x + l_x},
+            cycled_log = {rem(e_y + l_y, map_y), rem(e_x + l_x, map_x)},
+            tile = Map.get(map, cycled_log),
+            tile === :garden or tile === :elf,
+            into: MapSet.new() do
+          IO.puts(inspect(next_loc))
+          next_loc
+        end
+
+      new_steps =
+        for {e_y, e_x} <- steps,
+            {l_y, l_x} <- new_steps,
+            next_loc = {e_y + l_y, e_x + l_x},
+            cycled_log = {rem(e_y + l_y, map_y), rem(e_x + l_x, map_x)},
+            tile = Map.get(map, cycled_log),
+            tile === :garden or tile === :elf,
+            into: MapSet.new() do
+          next_loc
+        end
+
+      # IO.puts(inspect(new_steps))
+
+      # IO.puts("#{i} - #{MapSet.size(new_steps)}")
+      {new_steps, MapSet.union(steps, new_steps)}
+  end
+```
+
+```elixir
+
+```
+
+<!-- livebook:{"offset":6490,"stamp":{"token":"XCP.Hr-6w1t9iz9EvRF9BPMev6kqzKcCW9NC7-fU1wGAcTEgp0KZnFlNTlxrW-WlpJHlYxHhfcs4w72Cs6ec2hnr9RW-pGbaLawBhYFWfoLMDsMo18TGXxE","version":2}} -->
